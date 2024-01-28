@@ -1,66 +1,70 @@
-<%@page import="java.text.DecimalFormat" %>
+<%@page import="java.text.*" %>
 <%@include file="dbconnect.jsp" %>
-<%@ page import="java.sql.*"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@page import="java.sql.*" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>list</title>
-<link href ="./style.css" rel ="stylesheet">
+<link href="style.css" rel="stylesheet">
 </head>
 <body>
-<jsp:include page="./header.jsp"></jsp:include>
+<jsp:include page="header.jsp"/>
 <section>
-<h2 style="text-align:center"><b>롯데자이언츠 선수 목록 </b></h2><br>
-<form style="display:flex; align-items:center; justify-content:center; text-align:center">
+  <h2 style="text-align:center"><b>롯데자이언츠 코치별 관리 선수 목록</b></h2><br>
+  
+  <form style="display:flex; align-items: center; justify-content:center; text-align: center">
+<table border="1">
 
-<table border = "1">
 <tr>
-   <td> 선수번호 </td>
-   <td> 선수이름 </td>
-    <td> 선수포지션 </td>
-    <td> 선수등록일 </td>
-    <td> 선수등급 </td>
-    <td> 삭제 </td>
+	<td> 코치번호 </td>
+	<td> 코치이름 </td>
+	<td> 코치포지션 </td>
+	<td> 관리선수 </td>
+	<td> 관리선수연봉합계 </td>
+	<td> 관리선수평균연봉 </td>
+	<td> 관리선수최대연봉 </td>
+	<td> 관리선수최소연봉 </td>
 </tr>
 
 <%
 request.setCharacterEncoding("UTF-8");
-try
-{
-	String sql = "SELECT * FROM giants_player";
-	PreparedStatement pstmt = conn.prepareStatement(sql);
-	ResultSet rs = pstmt.executeQuery(sql);
-	
-	while(rs.next())
-	{
-		String day=rs.getString(4);
-		day = day.substring(0,4) + "년" + day.substring(4,6)+ "월" + day.substring(6,8) + "일";
+ try
+ {
+	 String sql = "SELECT cid,cname,cposition,count(pid), sum(pcost), avg(pcost), max(pcost), min(pcost)" +
+                  "FROM giants_coach NATURAL JOIN giants_money" +
+			 	  "GROUP BY cid, cname, cposition" +
+                  "ORDER BY sum(pcost) desc";
+	 PreparedStatement pstmt = conn.prepareStatement(sql);
+	 ResultSet rs = pstmt.executeQuery(sql);
+	 
+	 while(rs.next())
+	 {
 %>
-	<tr>
-		<td> <a href="modify.jsp?pid=<%rs.getString(1) %>"> <%rs.getString(1) %></a> </td>
-		<td> <%=rs.getString(2) %> </td>
-		<td> <%=rs.getString(3) %> </td>
-		<td> <%=day %> </td>
-		<td> <%=rs.getString(5) %> </td>
-		<td>
-		<a href="action.jsp?pid=<%=rs.getString(1) %>&mode=delete">삭제</a>
-		</td>
-	</tr>
+	 <tr>
+		<td> <%=rs.getString(1) %></td>
+		<td> <%=rs.getString(2) %></td>
+		<td> <%=rs.getString(3) %></td>
+		<td> <%=rs.getInt(4) %>명</td>
+		<td> <%=rs.getInt(5) %></td>
+		<td> <%=rs.getInt(6) %></td>
+		<td> <%=rs.getInt(7) %></td>	 
+		<td> <%=rs.getInt(8) %></td>
+	 </tr>
 <%
 	}
 }
-catch(Exception e)
-{
-	e.printStackTrace();
-}
+ catch(Exception e)
+ {
+	 e.printStackTrace();
+ }
 %>
-
 </table>
-</form>
+
+  </form>
 </section>
+
 <jsp:include page="footer.jsp"/>
 </body>
 </html>
